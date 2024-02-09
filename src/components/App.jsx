@@ -32,24 +32,25 @@ const App = () => {
           largeImageURL: image.largeImageURL,
         }));
         setImages(prev => [...prev, ...newImages]);
-        setPage(prevPage => prevPage + 1);
-        setIsLoading(false);
         setTotalHits(response.data.totalHits);
+        setIsLoading(false);
       })
       .catch(error => {
         console.error('Error fetching images:', error);
         setIsLoading(false);
       });
-  }, [query, page]); // Includem `query` și `page` ca dependențe
+  }, [query, page]);
 
   useEffect(() => {
     if (query) fetchImages();
-  }, [query, page, fetchImages]); // Acum `fetchImages` este inclus ca dependență
+  }, [query, page, fetchImages]);
 
-  const handleSubmit = query => {
-    setQuery(query);
-    setPage(1);
-    setImages([]);
+  const handleSubmit = newQuery => {
+    if (newQuery !== query) {
+      setQuery(newQuery);
+      setPage(1);
+      setImages([]);
+    }
   };
 
   const handleImageClick = image => {
@@ -66,7 +67,7 @@ const App = () => {
       <Searchbar onSubmit={handleSubmit} query={query} />
       <ImageGallery images={images} onImageClick={handleImageClick} />
       {isLoading && <Loader />}
-      {images.length < totalHits && (
+      {images.length > 0 && images.length < totalHits && !isLoading && (
         <Button onLoadMore={() => setPage(prevPage => prevPage + 1)} />
       )}
       {showModal && <Modal image={modalImage} onClose={closeModal} />}
